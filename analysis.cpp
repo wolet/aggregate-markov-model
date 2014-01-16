@@ -12,16 +12,16 @@ void Analysis::print_grouping (unsigned int groupsz) {
 	
 	outmap::const_iterator it (alg->outputs.f.begin());
 	int c (it->second.size());
-	vector<pair<string, double> >* grouping = 
-			new vector<pair<string, double> >[c];
+	vector<pair<string, float> >* grouping = 
+			new vector<pair<string, float> >[c];
 	
 	for (outmap::const_iterator it (alg->outputs.g.begin()); 
 			it != alg->outputs.g.end();
 			++it)
 	{
 		int index (0);
-		double max (0);
-		for (vector<double>::const_iterator vit (it->second.begin());
+		float max (0);
+		for (vector<float>::const_iterator vit (it->second.begin());
 				vit != it->second.end();
 				++vit)
 		{
@@ -30,14 +30,14 @@ void Analysis::print_grouping (unsigned int groupsz) {
 				index = vit - it->second.begin();
 			}
 		}
-		grouping[index].push_back(pair<string, double>(it->first, max));
+		grouping[index].push_back(pair<string, float>(it->first, max));
 	}
 	
 	Sortbyfreq sortbyfreq(*this);
 	Sortbyprob sortbyprob(*this);
 	for (int i (0); i < c; ++i) {
 		sort(grouping[i].begin(), grouping[i].end(), sortbyfreq);
-		vector<pair<string, double> >::iterator start;
+		vector<pair<string, float> >::iterator start;
 		if (groupsz < grouping[i].size()) {
 			start = grouping[i].begin() + groupsz;
 		}
@@ -50,7 +50,7 @@ void Analysis::print_grouping (unsigned int groupsz) {
 	
 	for (int i (0); i < c; ++i) {
 		cout << "Class " << i << ": ";
-		for (vector<pair<string, double> >::const_iterator it 
+		for (vector<pair<string, float> >::const_iterator it 
 				(grouping[i].begin());
 				it != grouping[i].end(); 
 				++it) 
@@ -61,8 +61,6 @@ void Analysis::print_grouping (unsigned int groupsz) {
 	}
 	
 }
-
-// nwords is defaulted to NWORDS (defined in header file)
 void Analysis::generate (int nwords, int seed) const {
 	
 	cout << nwords << " words generated from model: ";
@@ -76,7 +74,7 @@ void Analysis::generate (int nwords, int seed) const {
 		// randomly select a class for word w (weighted by probabilities)
 		// and the next word based on that class (weighted)
 		int m = select_weighted(alg->outputs.g[alg->train.getword(w)]);
-		vector<double> fvec;
+		vector<float> fvec;
 		for (outmap::const_iterator it (alg->outputs.f.begin());
 				it != alg->outputs.f.end();
 				++it)
@@ -89,13 +87,67 @@ void Analysis::generate (int nwords, int seed) const {
 	cout << endl;
 	
 }
+void Analysis::tag (stringvec sentence) const {
+  int L = sentence.size() -1,bestid,i;
+  string token;
+  float bestscore,s;
+  vector<float> w1,w2;
+
+  for(i=0;i<L;i++)
+    {
+      bestscore = 0;
+      bestid = 0;
+
+      for(int j=0;j< NWORDS; j++)
+	{
+	  if(alg->outputs.g.find( sentence[i]) == alg->outputs.g.end())
+	    w1 = w1 = alg->outputs.g[ "*UNKNOWN*" ];
+	  else
+	    w1 = alg->outputs.g[ sentence[i] ];
+
+	  if(alg->outputs.f.find( sentence[i+1]) == alg->outputs.f.end())
+	      w2 = alg->outputs.f[ "*UNKNOWN*" ];
+	  else
+	    w2 = alg->outputs.f[ sentence[i+1] ];
+	  s = w1[j] * w2[j];
+
+	  if(s > bestscore)
+	    {
+	      bestscore = s;
+	      bestid = j;
+	    }
+	}
+      //cout << ">>>>>" << sentence[i] << " " << bestid << " " << bestscore << endl;
+      cout << sentence[i] << " " << bestid  <<  endl;
+    }
+  bestscore = 0;
+  bestid = 0;
+  for(int j=0;j< NWORDS; j++)
+    {
+      if(alg->outputs.g.find( sentence[i]) == alg->outputs.g.end())
+	w1 = w1 = alg->outputs.g[ "*UNKNOWN*" ];
+      else
+	w1 = alg->outputs.g[ sentence[i] ];
+
+      s = w1[j];
+      //      cout << sentence[i] << " " <<  " " << j << " " << s << " " << bestscore << endl;
+      if(s > bestscore)
+	{
+	  bestscore = s;
+	  bestid = j;
+	}
+    }
+  //    cout << ">>>>>" << sentence[i] << " " << bestid << " " << bestscore << endl;
+  cout << sentence[i] << "\t" << bestid << endl;
+
+}
 
 // declared static in header file
-int Analysis::select_weighted (vector<double> vec) {
+int Analysis::select_weighted (vector<float> vec) {
 
-	double r = ((double)rand()) / RAND_MAX;
-	double cumsum = 0;
-	vector<double>::const_iterator it (vec.begin());
+	float r = ((float)rand()) / RAND_MAX;
+	float cumsum = 0;
+	vector<float>::const_iterator it (vec.begin());
 	for ( ; it != vec.end(); ++it)
 	{
 		cumsum += *it;
@@ -103,7 +155,7 @@ int Analysis::select_weighted (vector<double> vec) {
 			break;
 		}
 	}
-	
+
 	return (it == vec.end() ? it - vec.begin() - 1 : it - vec.begin());
-	
+
 }

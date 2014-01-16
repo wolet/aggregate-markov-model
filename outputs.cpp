@@ -10,30 +10,30 @@ YALE COLLEGE
 
 using namespace std;
 
-void Outputs::normalize (vector<double>& vec, double sum) {
+void Outputs::normalize (vector<float>& vec, float sum) {
 
-	for (vector<double>::iterator it = vec.begin(); it != vec.end(); ++it) 
+	for (vector<float>::iterator it = vec.begin(); it != vec.end(); ++it) 
 	{
 		*it /= sum;
 	}
 	
 }
 
-// fill f and g with random doubles
+// fill f and g with random floats
 void Outputs::initialize (stringvec const& words, int c, int seed) {
 
 	srand(seed);
-	double* fsum = new double[c];
+	float* fsum = new float[c];
 	
 	for (stringvec::const_iterator it (words.begin()); it != words.end(); ++it) 
 	{
 	
-		double gsum (0);
+		float gsum (0);
 		
 		for (int i (0); i < c; ++i) {
 		
-			double frand = ((double)rand() / RAND_MAX);
-			double grand = ((double)rand() / RAND_MAX);
+			float frand = ((float)rand() / RAND_MAX);
+			float grand = ((float)rand() / RAND_MAX);
 			
 			f[*it].push_back(frand);
 			g[*it].push_back(grand);
@@ -56,11 +56,11 @@ void Outputs::initialize (stringvec const& words, int c, int seed) {
 	
 }
 
-void Outputs::update_f (outmap& oldf, double smooth) {
+void Outputs::update_f (outmap& oldf, float smooth) {
 
-	double dec (smooth / oldf.size());
+	float dec (smooth / oldf.size());
 	for (outmap::iterator it (oldf.begin()); it != oldf.end(); ++it) {
-		for (vector<double>::iterator vit (it->second.begin());
+		for (vector<float>::iterator vit (it->second.begin());
 				vit != it->second.end();
 				++vit)
 		{
@@ -76,7 +76,7 @@ void Outputs::update_f (outmap& oldf, double smooth) {
 }
 
 void Outputs::create_test_outputs 
-		(stringvec const& words, Outputs& old, double smooth, int seed) 
+		(stringvec const& words, Outputs& old, float smooth, int seed) 
 {
 	
 	srand(seed);
@@ -91,10 +91,10 @@ void Outputs::create_test_outputs
 			update_f(old.f, smooth);
 			
 			// fill f and g
-			double sum (0);
+			float sum (0);
 			for (int i (0); i < c; ++i) {
 				f[*it].push_back(smooth);
-				double grand ((double)rand() / RAND_MAX);
+				float grand ((float)rand() / RAND_MAX);
 				g[*it].push_back(grand);
 				sum += grand;
 			}
@@ -121,7 +121,7 @@ void Outputs::print_f () const {
 	cout << endl;
 	
 	for (int i (0); i < c; ++i) {
-		double sum (0);
+		float sum (0);
 		for (it = f.begin(); it != f.end(); ++it) {
 			sum += it->second[i];
 			cout << it->second[i] << '\t';
@@ -135,9 +135,9 @@ void Outputs::print_g () const {
 
 	cout << "g: \n" << setprecision(3) << fixed;
 	for (outmap::const_iterator it = g.begin(); it != g.end(); ++it) {
-		double sum (0);
+		float sum (0);
 		cout << it->first << '\t';
-		for (vector<double>::const_iterator vit = it->second.begin();
+		for (vector<float>::const_iterator vit = it->second.begin();
 				vit != it->second.end();
 				++vit)
 		{

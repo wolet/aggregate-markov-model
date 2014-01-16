@@ -10,7 +10,7 @@ YALE COLLEGE
 
 using namespace std;
 
-Corpus::Corpus (int c_, ifstream& fin, Corpus* old, double smooth) 
+Corpus::Corpus (int c_, ifstream& fin, Corpus* old, float smooth) 
 : words(), counts(), W(), I(), v(), c(c_), vtot()
 {
 
@@ -22,7 +22,7 @@ Corpus::Corpus (int c_, ifstream& fin, Corpus* old, double smooth)
 	}
 	
 	#if (DEBUG)
-		cout << vtot << " words read; corpus initialized\n";
+		cerr << vtot << " words read; corpus initialized\n";
 	#endif
 	
 }
@@ -32,7 +32,8 @@ void Corpus::readin(string word) {
 	words.push_back(word);
 	++counts[word];
 	++v;
-	
+	if(counts[word] == 1)
+	  word2id[word] = words.size() - 1;
 }
 
 string Corpus::process(string word, Corpus* old) {
@@ -44,17 +45,17 @@ string Corpus::process(string word, Corpus* old) {
 			return "UNK";
 		}
 	}
-	
+	/*
 	if (!isalpha((int)word[0]) and word.size() > 1) {
 		return "#";
 	}
-	
+	*/
 	return word;
 	
 }
 
 // get the list of distinct words and the counts of word pairs
-void Corpus::getwords (ifstream& fin, Corpus* oldcorp, double smooth) {
+void Corpus::getwords (ifstream& fin, Corpus* oldcorp, float smooth) {
 
 	string w;
 	int old(0);
@@ -117,14 +118,14 @@ void Corpus::getwords (ifstream& fin, Corpus* oldcorp, double smooth) {
 
 void Corpus::print () const {
 
-	cout << endl << "Word:\tCount:\n";
+	cerr << endl << "Word:\tCount:\n";
 	for (intmap::const_iterator it (counts.begin()); it != counts.end(); ++it) {
-		cout << it->first << '\t' << it->second << endl;
+		cerr << it->first << '\t' << it->second << endl;
 	}
-	cout << endl;
-	cout << "Pair counts:\n";
+	cerr << endl;
+	cerr << "Pair counts:\n";
 	for (wordmap::const_iterator i = W.begin(); i != W.end(); ++i) {
-		cout << (i->first).first << '\t' << (i->first).second << '\t'
+		cerr << (i->first).first << '\t' << (i->first).second << '\t'
 				<< i->second << endl;
 	}
 }
@@ -145,13 +146,13 @@ int main (int argc, char** argv) {
 		test = new Corpus(c, ftest);
 	}
 	catch (logic_error& e) {
-		cout << e.what();
+		cerr << e.what();
 		exit(1);
 	}
 	
-	cout << "TRAIN: \n";
+	cerr << "TRAIN: \n";
 	train->print();
-	cout << "TEST: \n";
+	cerr << "TEST: \n";
 	test->print();
 	
 }

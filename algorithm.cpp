@@ -12,49 +12,55 @@ YALE COLLEGE
 
 using namespace std;
 
-inline double& Algorithm::Array3D::operator() (int i, int j, int m) {
-	return arr[i*parent.v*parent.c + j*parent.c + m];
+inline float& Algorithm::Array3D::operator() (int i, int j, int m) {
+  //	return arr[i*parent.v*parent.c + j*parent.c + m];
+  return arr[i][j][m];
 }
 
 void Algorithm::Array3D::print () {
 
 	for (int m=0; m<parent.c; ++m) {
-		cout << "m = " << m << ":\n";
+		cerr << "m = " << m << ":\n";
 		for (int i=0; i<parent.v; ++i) {
 			for (int j=0; j<parent.v; ++j) {
-				cout << operator()(i, j, m) << ' ';
+				cerr << operator()(i, j, m) << ' ';
 			}
-			cout << endl;
+			cerr << endl;
 		}
 	}
-	
+
 }
 
 // e-step
 void Algorithm::Run () {
-	
-	Outputs old(train);
-	double old_perplexity, new_perplexity (calc_perplexity(train, outputs));
+
+  //	Outputs old(train);
+  //	float old_perplexity, new_perplexity (calc_perplexity(train, outputs));
+        float old_perplexity(0), new_perplexity(0);
 	clock_t start, end;
+
+	float* fdenoms;
+	float* gdenoms;
 	iter = 0;
 	#if (DEBUG)
-		cout << "Run beginning\n";
-		cout << "v = " << v << "; c = " << c << endl;
-		cout << "#iter\tPerplexity\tTime\t\tTest Perplexity\n";
+		cerr << "Run beginning\n";
+		cerr << "v = " << v << "; c = " << c << endl;
+
 	#endif
-	
+
+	Array3D tmp(*this);
+	cerr << "#iter\tPerplexity\tTime\t\tTest Perplexity\n";
 	do {
-	
+
 		++iter;
-		Array3D tmp(*this);
-		old.copyfrom(outputs);
-		
+		//		old.copyfrom(outputs);
+
 		// calculate full table of intermediate values (for speedup)
 		calc_h(tmp);
-		
+
 		// calculate denominators
-		double* fdenoms = new double[c];
-		double* gdenoms = new double[v];
+		fdenoms = new float[c];
+		gdenoms = new float[v];
 		for (int m=0; m<c; ++m) {
 			fdenoms[m] = 0;
 			for (int j=0; j<v; ++j) {
@@ -71,47 +77,36 @@ void Algorithm::Run () {
 				}
 			}
 		}
-		
+
 		// go through each possible word-class pair
 		for (int i=0; i<v; ++i) {
-			
+
 			for (int m=0; m<c; ++m) {
-			
+
 				string w (train.getword(i));
 
 				// compute f and g for word i and class m
-				double fnum(0), gnum(0);
+				float fnum(0), gnum(0);
 				for (int j=0; j<v; ++j) {
 					fnum += tmp(j, i, m);
 					gnum += tmp(i, j, m);
 				}
-				
+
 				// update the arrays
 				outputs.f[w][m] = fnum / fdenoms[m];
 				outputs.g[w][m] = gnum / gdenoms[i];
-				
+
 			}
-			
+
 		}
-		
-		old_perplexity = new_perplexity;
-		//new_perplexity = calc_perplexity(train, outputs);
-		
+		delete(fdenoms);
+		delete(gdenoms);
+		//old_perplexity = new_perplexity;
+		//      		new_perplexity = calc_perplexity(train, outputs);
 		#if (DEBUG)
-			end = clock();
-			double iter_time ((double)(end-start)/CLOCKS_PER_SEC);
-			cout << iter << endl; //<< '\t' << train_perplexity() << '\t' << iter_time << '\t'
-			//		<< test_perplexity() << endl;
-		
-			// print each iteration
-			/*cout << "-------------------------------\nIteration " 
-					<< iter << endl;
-			print_outputs();*/
-			start = clock();
+           		cerr << iter << endl;
 		#endif
-	
 	} while (!isConverged(old_perplexity, new_perplexity));
-	
 }
 
 // computes the probability that word i belongs to class m given that word i
@@ -120,43 +115,43 @@ void Algorithm::calc_h (Array3D& tmp) {
 
 	for (int i=0; i<v; ++i) {
 		for (int j=0; j<v; ++j) {
-			double ct (train.paircount(i, j));
-			vector<double> const& fvec (outputs.f[train.getword(j)]);
-			vector<double> const& gvec (outputs.g[train.getword(i)]);
-			double denom (inner_product(fvec.begin(), fvec.end(), 
+			float ct (train.paircount(i, j));
+			vector<float> const& fvec (outputs.f[train.getword(j)]);
+			vector<float> const& gvec (outputs.g[train.getword(i)]);
+			float denom (inner_product(fvec.begin(), fvec.end(), 
 					gvec.begin(), 0.0));
 			for (int m=0; m<c; ++m) {
 				tmp(i, j, m) = ((fvec[m] * gvec[m]) / denom) * ct;
 			}
 		}
 	}
-	
+
 }
 
 // computes the log likelihood of the test corpus
-double Algorithm::loglk (Corpus& c, Outputs const& o) {
+float Algorithm::loglk (Corpus& c, Outputs const& o) {
 
-	double result (0);
-	
+	float result (0);
+
 	for (outmap::const_iterator git (o.g.begin()); git != o.g.end(); ++git) {
 		string w1 (git->first);
-		vector<double> v1 (git->second);
+		vector<float> v1 (git->second);
 		for (outmap::const_iterator fit (o.f.begin()); fit != o.f.end(); ++fit) 
 		{
 			string w2 (fit->first);
-			vector<double> v2 (fit->second);
-			double tprob (inner_product(v1.begin(), v1.end(), v2.begin(), 0.0));
+			vector<float> v2 (fit->second);
+			float tprob (inner_product(v1.begin(), v1.end(), v2.begin(), 0.0));
 			result += c.paircount(w1, w2) * log(tprob);
 		}
+
 	}
-	
 	return result;
-	
+
 }
 
 // tests for convergence
-bool Algorithm::isConverged (double old, double neww, double eps) 
+bool Algorithm::isConverged (float old, float neww, float eps) 
 {
-	double change ((old - neww) / old);
+  	float change ((old - neww) / old);
 	return NITER == 0 ? change < eps : iter == NITER;
 }
