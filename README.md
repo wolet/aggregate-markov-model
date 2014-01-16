@@ -14,6 +14,7 @@ To compile and see command line options just run this:
      ./amm
 
 Command lines options are self-explanatory:
+
      usage: executable numOfClasses trainCorp testCorp option
      options : { p | i | gr | gen  }
        p : print testCorpus perplexity
