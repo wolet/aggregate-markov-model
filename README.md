@@ -15,7 +15,7 @@ To compile and see command line options just run this:
 
 Command lines options are self-explanatory:
 
-     usage: executable numOfClasses trainCorp testCorp option
+     usage: executable #OfClasses #OfIteration trainCorp testCorp option
      options : { p | i | gr | gen  }
        p : print testCorpus perplexity
        i : induce POS tags
@@ -24,4 +24,4 @@ Command lines options are self-explanatory:
 
 TODO:
 - Add a better README file.
-- Take random seed and iteration number from command line
+- Take random seed from command line

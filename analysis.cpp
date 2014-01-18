@@ -1,10 +1,3 @@
-/**********************************
-DEEPA CHARI
-FALL 2012
-CS 490 - SENIOR PROJECT
-YALE COLLEGE
-**********************************/
-
 #include "header.hpp"	// class declarations
 using namespace std;
 

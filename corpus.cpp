@@ -1,10 +1,3 @@
-/**********************************
-DEEPA CHARI
-FALL 2012
-CS 490 - SENIOR PROJECT
-YALE COLLEGE
-**********************************/
-
 #include <string>		// to represent words
 #include "header.hpp"	// class declarations
 

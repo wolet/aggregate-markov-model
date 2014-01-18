@@ -1,10 +1,3 @@
-/**********************************
-DEEPA CHARI
-FALL 2012
-CS 490 - SENIOR PROJECT
-YALE COLLEGE
-**********************************/
-
 #pragma once
 
 #define _USE_MATH_DEFINES
@@ -23,7 +16,7 @@ YALE COLLEGE
 #define NWORDS 		12
 #define DEBUG		1
 #define GROUPSIZE	5
-#define NITER		10
+//#define NITER		10
 #define SMOOTH		.00001
 #define EPSILON		.005
 
@@ -129,29 +122,29 @@ class Algorithm {
 		// : parent (p), arr (new float[p.v * p.v * p.c]) 
 		// {}
 	  Array3D (Algorithm& p): parent (p) {
-
+		#if (DEBUG)
 	    	std::cerr << "Allocation started\n" ;
-
+		#endif
 		arr = (float ***)malloc(p.v*sizeof(float **));
-
-		std::cerr << "#First part allocated\n" ;
 		for(int i=0;i<p.v;i++)
 		  {
 		    arr[i] = (float **)malloc(p.v*sizeof(float *));
 		    for(int j=0;j<p.v;j++)
 		      arr[i][j] = (float *)malloc(p.c*sizeof(float ));
-		    if(i % (p.v/10) == 0)
-		      std::cerr << 100*i/p.v <<" # ";
+                    #if (DEBUG)
+		        if(i % (p.v/10) == 0)
+		          std::cerr << 100*i/p.v <<" # ";
+		    #endif
 		  }
-		std::cerr << "\n#Temp allocated\n";
-
+                #if (DEBUG)
+		    std::cerr << "\n#Temp allocated\n";
+                #endif
 	  }
 	  //	  : parent (p), arr (){}
 	  //	        ~Array3D(){delete(arr);}
 		float& operator() (int i, int j, int m);
 		void print ();
 	};
-	
 	// data members
 	Corpus& train;			// training words/counts
 	Corpus& test;			// test words/counts
@@ -159,11 +152,11 @@ class Algorithm {
 	const int v;
 	const int c;
 	int iter;				// number of iterations taken by the algorithm
-	
+        int NITER;
   public:
 	
-	Algorithm (Corpus& tr, Corpus& te, Outputs& o)
-	: train(tr), test(te), outputs(o), v(tr.getv()), c(tr.getc()), iter()
+        Algorithm (Corpus& tr, Corpus& te, Outputs& o,int it)
+	  : train(tr), test(te), outputs(o), v(tr.getv()), c(tr.getc()), iter(), NITER(it)
 	{}
 	void Run ();
 	int num_iter () const		{ return iter; }
@@ -183,8 +176,6 @@ class Algorithm {
 	float calc_perplexity (Corpus& c, Outputs const& o) {
 		return pow(M_E, loglk(c, o) * -1.0 / c.getvtot()); 
 	}
-	bool isConverged (float old, float neww, float eps=EPSILON);
-	
 };
 
 class Analysis {

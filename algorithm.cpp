@@ -1,10 +1,3 @@
-/**********************************
-DEEPA CHARI
-FALL 2012
-CS 490 - SENIOR PROJECT
-YALE COLLEGE
-**********************************/
-
 #include <cmath>		// for log
 #include <cstring>		// for memcpy
 #include <ctime>		// for debugging the algorithm
@@ -36,20 +29,22 @@ void Algorithm::Run () {
 
   //	Outputs old(train);
   //	float old_perplexity, new_perplexity (calc_perplexity(train, outputs));
-        float old_perplexity(0), new_perplexity(0);
+        float old_perplexity(0), new_perplexity(0),train_perplexity,test_perplexity;
 	clock_t start, end;
 
 	float* fdenoms;
 	float* gdenoms;
 	iter = 0;
+	Array3D tmp(*this);
+
 	#if (DEBUG)
 		cerr << "Run beginning\n";
 		cerr << "v = " << v << "; c = " << c << endl;
-
+		cerr << "#iter\tTraining Perplexity\t\tTest Perplexity\n";
 	#endif
 
-	Array3D tmp(*this);
-	cerr << "#iter\tPerplexity\tTime\t\tTest Perplexity\n";
+
+
 	do {
 
 		++iter;
@@ -101,12 +96,12 @@ void Algorithm::Run () {
 		}
 		delete(fdenoms);
 		delete(gdenoms);
-		//old_perplexity = new_perplexity;
-		//      		new_perplexity = calc_perplexity(train, outputs);
 		#if (DEBUG)
-           		cerr << iter << endl;
+      		train_perplexity = calc_perplexity(train, outputs);
+		test_perplexity = calc_perplexity(test, outputs);
+		cerr << iter << "/" << NITER << "\t" << train_perplexity << "\t\t\t" << test_perplexity << endl;
 		#endif
-	} while (!isConverged(old_perplexity, new_perplexity));
+	} while (iter!=NITER);
 }
 
 // computes the probability that word i belongs to class m given that word i
@@ -147,11 +142,4 @@ float Algorithm::loglk (Corpus& c, Outputs const& o) {
 	}
 	return result;
 
-}
-
-// tests for convergence
-bool Algorithm::isConverged (float old, float neww, float eps) 
-{
-  	float change ((old - neww) / old);
-	return NITER == 0 ? change < eps : iter == NITER;
 }

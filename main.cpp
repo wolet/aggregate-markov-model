@@ -2,7 +2,7 @@
 
 void printError()
 {
-  std::cout << "usage: executable numOfClasses trainCorp testCorp option\n";
+  std::cout << "usage: executable #OfClasses #OfIteration trainCorp testCorp option\n";
   std::cout << "options : { p | i | gr | gen  }\n";
   std::cout << " p : print testCorpus perplexity\n i : induce POS tags\n gr : print groupings\n gen : generate text\n";
   exit(0);
@@ -14,16 +14,17 @@ int main(int argc, char** argv) {
 	/**************************** read command line **************************/
         std::set<std::string>OPT ={"p","i","gen","gr"};
 	std::set<std::string>tasks;
-	if (argc < 5)printError();
-	for(int i=4;i<argc;i++)
+	if (argc < 6)printError();
+	for(int i=5;i<argc;i++)
 	  {
 	    if(OPT.find(argv[i]) == OPT.end())printError();
 	    tasks.insert(argv[i]);
 	  }
 
 	int c = atoi(argv[1]);
-	ifstream ftrain(argv[2]);
-	ifstream ftest(argv[3]);
+	int it = atoi(argv[2]);
+	ifstream ftrain(argv[3]);
+	ifstream ftest(argv[4]);
 
 
 	/**************************** initialize objects **************************/
@@ -39,13 +40,12 @@ int main(int argc, char** argv) {
 	}
 
 	Outputs out(*train);
-	Algorithm alg(*train, *test, out);
+	Algorithm alg(*train, *test, out,it);
 
 	alg.Run();
 	if(tasks.find("p") != tasks.end())
 	  {
-	        string result = (NITER != 0) ? "HALTED" : "CONVERGED";
-        	cout << result << " after " << alg.num_iter() << " iteration(s) with "
+        	cout << " After " << it << " iteration(s) with "
 			<< "perplexity " << alg.train_perplexity() << endl;
 	        cout << "Perplexity of test set: " << alg.test_perplexity() << endl;
 	  }
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 	    string token,line;
 	    stringvec s;
 	    int sent(0);
-	    ifstream ftest(argv[3]);
+	    ifstream ftest(argv[4]);
 
 	    cerr << "Sentence are being processed:" << endl;
 	    while(getline( ftest, line ))
